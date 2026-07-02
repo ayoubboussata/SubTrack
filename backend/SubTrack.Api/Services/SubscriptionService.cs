@@ -1,4 +1,5 @@
 using SubTrack.Api.Common.Exceptions;
+using SubTrack.Api.Common.Mapping;
 using SubTrack.Api.DTOs.Subscriptions;
 using SubTrack.Api.Models;
 using SubTrack.Api.Models.Enums;
@@ -18,13 +19,13 @@ public class SubscriptionService : ISubscriptionService
     public async Task<List<SubscriptionResponse>> GetAllAsync(Guid userId, SubscriptionCategory? category, bool? isActive)
     {
         var items = await _subscriptions.GetForUserAsync(userId, category, isActive);
-        return items.Select(ToResponse).ToList();
+        return items.Select(s => s.ToResponse()).ToList();
     }
 
     public async Task<SubscriptionResponse> GetByIdAsync(Guid userId, Guid id)
     {
         var subscription = await GetOwnedOrThrowAsync(userId, id);
-        return ToResponse(subscription);
+        return subscription.ToResponse();
     }
 
     public async Task<SubscriptionResponse> CreateAsync(Guid userId, CreateSubscriptionRequest request)
@@ -47,7 +48,7 @@ public class SubscriptionService : ISubscriptionService
         };
 
         await _subscriptions.AddAsync(subscription);
-        return ToResponse(subscription);
+        return subscription.ToResponse();
     }
 
     public async Task<SubscriptionResponse> UpdateAsync(Guid userId, Guid id, UpdateSubscriptionRequest request)
@@ -65,7 +66,7 @@ public class SubscriptionService : ISubscriptionService
         subscription.UpdatedAt = DateTime.UtcNow;
 
         await _subscriptions.SaveChangesAsync();
-        return ToResponse(subscription);
+        return subscription.ToResponse();
     }
 
     public async Task DeleteAsync(Guid userId, Guid id)
@@ -87,17 +88,4 @@ public class SubscriptionService : ISubscriptionService
             throw new NotFoundException("Subscription not found.");
         return subscription;
     }
-
-    private static SubscriptionResponse ToResponse(Subscription s) => new(
-        s.Id,
-        s.Name,
-        s.Price,
-        s.Currency,
-        s.BillingCycle,
-        s.NextRenewalDate,
-        s.Category,
-        s.IsActive,
-        s.Notes,
-        s.CreatedAt,
-        s.UpdatedAt);
 }

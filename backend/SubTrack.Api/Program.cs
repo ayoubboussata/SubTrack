@@ -41,6 +41,7 @@ builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 // --- Authentication (JWT bearer) ---
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
