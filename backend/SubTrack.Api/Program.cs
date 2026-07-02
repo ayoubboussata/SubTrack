@@ -37,8 +37,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // --- Application services ---
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 
 // --- Authentication (JWT bearer) ---
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
