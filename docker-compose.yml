@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: subtrack-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: subtrack
+      POSTGRES_USER: subtrack
+      POSTGRES_PASSWORD: subtrack_dev_pw
+    ports:
+      - "5432:5432"
+    volumes:
+      - subtrack-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U subtrack -d subtrack"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  subtrack-db-data:

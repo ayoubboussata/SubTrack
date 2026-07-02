@@ -1,0 +1,22 @@
+# Normalize line endings: LF in the repo, auto-converted on checkout.
+* text=auto eol=lf
+
+# Force LF for these text formats regardless of platform.
+*.cs        text eol=lf
+*.csproj    text eol=lf
+*.sln       text eol=lf
+*.json      text eol=lf
+*.js        text eol=lf
+*.jsx       text eol=lf
+*.css       text eol=lf
+*.html      text eol=lf
+*.md        text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+
+# Treat as binary (never touch line endings).
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.gif       binary
+*.ico       binary

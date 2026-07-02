@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SubTrack.Api", "SubTrack.Api\SubTrack.Api.csproj", "{BBF52CA1-0158-445E-A004-DA65E29B50C3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BBF52CA1-0158-445E-A004-DA65E29B50C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BBF52CA1-0158-445E-A004-DA65E29B50C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BBF52CA1-0158-445E-A004-DA65E29B50C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BBF52CA1-0158-445E-A004-DA65E29B50C3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
