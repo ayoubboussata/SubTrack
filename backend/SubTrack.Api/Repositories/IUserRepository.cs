@@ -4,9 +4,12 @@ namespace SubTrack.Api.Repositories;
 
 public interface IUserRepository
 {
+    Task<User?> GetByIdAsync(Guid id);
+
     Task<User?> GetByEmailAsync(string email);
 
-    Task<User?> GetByRefreshTokenAsync(string refreshToken);
+    /// <summary>Looks up a user by the STORED (hashed) refresh token.</summary>
+    Task<User?> GetByRefreshTokenAsync(string refreshTokenHash);
 
     Task<bool> EmailExistsAsync(string email);
 

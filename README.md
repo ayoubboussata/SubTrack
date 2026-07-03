@@ -52,7 +52,21 @@ _Coming soon._
 docker compose up -d
 ```
 
-### 2. Run the backend
+### 2. Configure the backend secret
+
+The JWT signing key is **not** committed. Provide it via user-secrets (dev) — the app
+refuses to start without a key of at least 32 characters:
+
+```bash
+cd backend/SubTrack.Api
+dotnet user-secrets init          # once, if not already initialised
+dotnet user-secrets set "Jwt:Key" "$(openssl rand -base64 48)"
+```
+
+In production, supply it as the `Jwt__Key` environment variable instead. The database
+connection string can likewise be overridden with `ConnectionStrings__DefaultConnection`.
+
+### 3. Run the backend
 
 ```bash
 cd backend/SubTrack.Api
@@ -62,7 +76,7 @@ dotnet run
 The API runs at `http://localhost:5052` (Swagger UI at `http://localhost:5052/swagger`).
 An HTTPS profile is also available at `https://localhost:7158`.
 
-### 3. Run the frontend
+### 4. Run the frontend
 
 ```bash
 cd frontend

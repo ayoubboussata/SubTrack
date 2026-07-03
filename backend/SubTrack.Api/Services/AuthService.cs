@@ -9,6 +9,14 @@ namespace SubTrack.Api.Services;
 
 public class AuthService : IAuthService
 {
+    // Explicit, documented work factor (BCrypt's default is 11) so it can be raised over time.
+    private const int BcryptWorkFactor = 12;
+
+    // Used to spend the same time hashing when the email is unknown, so login response
+    // timing does not reveal whether an account exists (see LoginAsync).
+    private static readonly string DummyHash =
+        BCrypt.Net.BCrypt.EnhancedHashPassword("timing-attack-dummy-value", BcryptWorkFactor);
+
     private readonly IUserRepository _users;
     private readonly ITokenService _tokens;
     private readonly JwtSettings _jwt;
@@ -31,7 +39,9 @@ public class AuthService : IAuthService
         {
             Id = Guid.NewGuid(),
             Email = email,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
+            // Enhanced API SHA-384-prehashes the password so the full value is used
+            // (classic BCrypt silently truncates at 72 bytes).
+            PasswordHash = BCrypt.Net.BCrypt.EnhancedHashPassword(request.Password, BcryptWorkFactor),
             CreatedAt = DateTime.UtcNow
         };
 
@@ -45,9 +55,13 @@ public class AuthService : IAuthService
         var email = Normalize(request.Email);
         var user = await _users.GetByEmailAsync(email);
 
-        // Same generic error whether the email is unknown or the password is wrong,
-        // so we don't leak which emails are registered.
-        if (user is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+        // Always run a hash verification (against a dummy hash when the email is unknown)
+        // so the response takes the same time regardless of whether the account exists.
+        var hash = user?.PasswordHash ?? DummyHash;
+        var passwordValid = BCrypt.Net.BCrypt.EnhancedVerify(request.Password, hash);
+
+        // Same generic error either way, so we don't leak which emails are registered.
+        if (user is null || !passwordValid)
             throw new UnauthorizedException("Invalid email or password.");
 
         var response = IssueTokens(user);
@@ -57,7 +71,8 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse> RefreshAsync(RefreshRequest request)
     {
-        var user = await _users.GetByRefreshTokenAsync(request.RefreshToken);
+        // The DB stores only the hash, so hash the incoming token before looking it up.
+        var user = await _users.GetByRefreshTokenAsync(_tokens.HashRefreshToken(request.RefreshToken));
 
         if (user is null || user.RefreshTokenExpiresAt is null || user.RefreshTokenExpiresAt < DateTime.UtcNow)
             throw new UnauthorizedException("Invalid or expired refresh token.");
@@ -68,16 +83,27 @@ public class AuthService : IAuthService
         return response;
     }
 
+    public async Task LogoutAsync(Guid userId)
+    {
+        var user = await _users.GetByIdAsync(userId);
+        if (user is null)
+            return;
+
+        user.RefreshToken = null;
+        user.RefreshTokenExpiresAt = null;
+        await _users.SaveChangesAsync();
+    }
+
     /// <summary>
-    /// Generates a fresh access + refresh token pair and stores the refresh token on the user.
-    /// The caller is responsible for persisting (Add for new users, SaveChanges for existing).
+    /// Generates a fresh access + refresh token pair. The raw refresh token is returned to the
+    /// client; only its hash is stored on the user. The caller persists (Add / SaveChanges).
     /// </summary>
     private AuthResponse IssueTokens(User user)
     {
         var (accessToken, accessExpires) = _tokens.GenerateAccessToken(user);
         var refreshToken = _tokens.GenerateRefreshToken();
 
-        user.RefreshToken = refreshToken;
+        user.RefreshToken = _tokens.HashRefreshToken(refreshToken);
         user.RefreshTokenExpiresAt = DateTime.UtcNow.AddDays(_jwt.RefreshTokenDays);
 
         return new AuthResponse(accessToken, refreshToken, accessExpires, user.Email);

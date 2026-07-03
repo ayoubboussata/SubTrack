@@ -13,11 +13,14 @@ public class UserRepository : IUserRepository
         _db = db;
     }
 
+    public Task<User?> GetByIdAsync(Guid id) =>
+        _db.Users.FirstOrDefaultAsync(u => u.Id == id);
+
     public Task<User?> GetByEmailAsync(string email) =>
         _db.Users.FirstOrDefaultAsync(u => u.Email == email);
 
-    public Task<User?> GetByRefreshTokenAsync(string refreshToken) =>
-        _db.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
+    public Task<User?> GetByRefreshTokenAsync(string refreshTokenHash) =>
+        _db.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshTokenHash);
 
     public Task<bool> EmailExistsAsync(string email) =>
         _db.Users.AnyAsync(u => u.Email == email);
